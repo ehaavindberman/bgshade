@@ -1,4 +1,4 @@
-{smcl}
+ity{smcl}
 {* 4may2017}{...}
 {* version 8}
 {viewerjumpto "Legend" "bgshade##legend"}{...}
@@ -253,15 +253,11 @@ not extend to the end of the month.
 		
 {title:Authors}
 
-	Eric Haavind-Berman, Federal Reserve Bank of Boston, ehaavindberman@gmail.com
-	Aaron Markiewitz, Federal Reserve Board
+	Eric Haavind-Berman, University of Wisconsin - Madison, ehaavindberman@gmail.com
+	Aaron Markiewitz, University of Michigan
 	
 	Many thanks to the wonderful Research Assistants at the Boston Fed for helpful
 	feedback and comments.
-	
-	Obligatory disclaimer: The views expressed herein are those of the authors and do not
-	necessarily represent those of the Federal Reserve Bank of Boston or the Federal 
-	Reserve System. All errors are the authors' own.
 	
 {title:Also see}
 
