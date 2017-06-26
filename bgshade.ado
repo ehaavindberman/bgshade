@@ -11,7 +11,7 @@ TODO: add some other aggregation method for quarterly (is this positive/necessar
 
 capture program drop bgshade
 prog def bgshade, rclass
-	syntax varlist [if] [in] [,shaders(string) sstyle(string asis) NOXEXTend LEGend ///
+	syntax varlist [if] [in] [,shaders(string) sstyle(string asis) NOXEXTend LEGend  OLDshaders ///
 		twoway(string asis)]	
 
 	////////////////////////
@@ -23,12 +23,17 @@ prog def bgshade, rclass
 	
 	local num_shaders : word count `shaders'
 	if `num_shaders' == 1 {
-		local def_pattern l
+		local def_pattern
 		local def_color gs12
 	}
 	if `num_shaders' >= 2 {
 		local def_pattern l _ - -.
 		local def_color sienna orange sand eltgreen
+	}
+	
+	if c(version) >= 15 | "`oldshaders'" != "" {
+		local intensity_shifter %50
+		local def_pattern
 	}
 	
 	// change the default color to gs12 if it is an NBER shader
@@ -55,7 +60,7 @@ prog def bgshade, rclass
 	// default settings if necessary
 	if "`lpattern'" == "" & "`lstyle'" == "" local lpattern `def_pattern'
 	if `""`lcolor'""' == `""""' & "`lstyle'" == ""  local lcolor `def_color'
-	if "`intensity'" != "" & "`lstyle'" == "" local intensity *`intensity'
+	if "`intensity'" != "" & "`lstyle'" == "" local intensity `intensity'
 	if "`intensity'" == "" & "`lstyle'" == "" local intensity `intensity_shifter'
 	if "`noxextend'" == "on" local noxextend `noxextend_val'
 	
@@ -126,7 +131,7 @@ prog def bgshade, rclass
 		local top = `xmin'+2499
 		local x_range
 		while `bottom' <= `xmax' {
-			numlist "`bottom'/`top'"
+			numlist "`bottom'/`top'", sort
 			local x_range `x_range' `r(numlist)'
 			local bottom = `bottom'+2500
 			local top = `top'+2500
@@ -134,10 +139,10 @@ prog def bgshade, rclass
 		}
 	}
 	else {
-		numlist "`xmin'/`xmax'"
+		numlist "`xmin'/`xmax'", sort
 	}
 	local x_range `r(numlist)'
-	
+	local x_count: word count `x_range'
 	
 	
 	///////////////////////////
@@ -148,6 +153,11 @@ prog def bgshade, rclass
 	local added_lines
 	forvalues ii = 1/`num_shaders' {
 	
+		// for lwidth specifications
+		local wc: word count `lwidth'
+		if `wc' == `num_shaders' local user_width : word `ii' of `lwidth'
+		else local user_width `lwidth'
+		
 		local shader : word `ii' of `shaders'
 		local pattern : word `ii' of `lpattern'
 		local colororig : word `ii' of `lcolor'
@@ -173,73 +183,17 @@ prog def bgshade, rclass
 			continue
 		}
 		else {
-			// calculate lwidth here (rough approximation detailed below)
-			if "`lwidth'" == "" {
-				local x_count: word count `x_range'
-				local width = 470/`x_count'
-				local width "*`width'"
-				
-				
-				/////////////////////
-				// noxextend OPTION //
-				/////////////////////
-				/*
-				 For noxextend, we divide the shading range [x-.5,x] (which is
-				 what each shaed area is by default) into 200 individula pieces.
-				 Then, we take the noxextend number as a % to throw out of the 
-				 top or bottom and make the range [x+%/200,x] for mins
-				 or [x,x+.5-%/200] for maxes where % is the number provided
-				 in the string or 25 if the user sets noxextend to on. We also divide
-				 the line width by 200 for these added lines so that they look right.
-				 We also do [x,x+.25] or [x-.25,x] with half of the normal line 
-				 width for the other half of the xline.
-				 
-				 There will be an error (only deals with min side) if it is the
-				 top and bottom, but maybe they shouldn't be calling this in that case...
-				*/
-				local extra_line_min
-				local extra_line_max
-				if "`noxextend'" != "" {
-					local edge_width = 470/(200*`x_count') 	// decide width
-					local increment = 1/200				// find increment
-					local half_width = 470/(2*`x_count') // find half of width
-					
-					// take out min if it's shaded
-					foreach s in `shading_regions' {
-						if `s' == `xmin' {
-							local shading_regions : list shading_regions - xmin 
-							local bottom = `xmin' - .5 + `noxextend'/200
-							local top = `xmin' + .25
-							numlist "`bottom'(`increment')`xmin'"
-							local mins `r(numlist)'
-							local extra_line_min xline(`mins' , lwidth(*`edge_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
-							local extra_line_max `extra_line_max' xline(`top', lwidth(*`half_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
-							continue
-						}
-						// take out max if it's shaded
-						if `s' == `xmax' {
-							local shading_regions : list shading_regions - xmax 
-							local bottom = `xmax' - .25
-							local top = `xmax' + .5 - `noxextend'/200
-							numlist "`xmax'(`increment')`top'"
-							local maxes `r(numlist)'
-							local extra_line_max xline(`maxes' , lwidth(*`edge_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
-							local extra_line_max `extra_line_max' xline(`bottom', lwidth(*`half_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
-							continue
-						}
-					}
-				}
+			if "`oldshaders'" == "" {
+				get_regular_xlines , shading_regions(`shading_regions') x_count(`x_count') user_width(`user_width') color(`color') pattern(`pattern') lsty(`lsty') sty(`sty') `noextend'
+				local added_line `r(added_line)'
 			}
 			else {
-				// allow user to specify all lwidth or individual shader lwidth
-				local wc: word count `lwidth'
-				if `wc' == `num_shaders' local width : word `ii' of `lwidth'
-				else local width `lwidth'
+				get_old_way_xlines , shading_regions(`shading_regions') x_count(`x_count') user_width(`user_width') color(`color') pattern(`pattern') lsty(`lsty') sty(`sty') `noextend' noxextend(`noxextend') xmin(`xmin') xmax(`xmax')
+				local added_line `r(added_line)'
 			}
+
+
 			
-			// if we use noextend and it takes out the only value in shading regions, then we have an error, so we make sure we don't here
-			local wc : word count `shading_regions'
-			if `wc' > 0 local added_line xline(`shading_regions' , lwidth(`width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend') 
 		
 	
 
@@ -268,13 +222,13 @@ prog def bgshade, rclass
 				}
 				// if the colororig is an rgb, then put quotes around the fcolor and lcolor options
 				local wc : word count `colororig'
-				if `wc' == 3 local color `""`colororig'"*`intensity'"'
+				if `wc' == 3 local color `""`colororig'"`intensity'"'
 				
 				// create the legend ghost
 				local legend_ghost = `"(function `shader'=`ymiddle', range(`xmiddle' `xmiddle') recast(area) fcolor(`color') lcolor(`color') lstyle(`lsty') lwidth(0) base(`ymiddle') yvarf(`yfmt') xvarf(`xfmt') yvarlab("`ylab'")) || "'
 			}
 		}
-		local added_lines `added_lines' `added_line' `extra_line_max' `extra_line_min'
+		local added_lines `added_lines' `added_line'
 		local legend_ghosts `legend_ghosts' `legend_ghost'
 	}
 	
@@ -301,6 +255,154 @@ end
 
 
 
+
+// if the user does not specify that they want to use the old way to set the shaders
+capture prog drop get_regular_xlines
+prog def get_regular_xlines, rclass
+
+	syntax [anything] [ , shading_regions(string) x_count(string) user_width(string) ///
+		 color(string asis) pattern(string) lsty(string) sty(string) NOEXTend]
+		
+	// find discrete pieces and put ranges and averages into local macros
+	local start
+	local added_line
+	local wc : word count `shading_regions'
+	
+	forvalues ii = 1/`wc' {
+		
+		local v : word `ii' of `shading_regions'
+		
+		local jj = `ii' + 1
+		local v_next : word `jj' of `shading_regions'
+		
+		
+		// corner cases
+		if `ii' == 1 {
+			local start = `v'
+		}
+		if `ii' == `wc' {
+			local end = `v'
+		}
+		
+		// check for continuity
+		else if `v'+1 == `v_next' {
+			continue
+		}
+		else {
+			local end = `v'
+		}
+		
+		local average =  `start' + (`end'-`start') / 2
+		local shade_range = `end'-`start'+1
+		
+		local width = 470*`shade_range'/`x_count' 
+		local width = "*`width'"
+		
+		// use lwidth if user specified it
+		if "`user_width'" != "" local width `user_width'
+		
+		
+		local start `v_next'
+		local added_line `added_line' xline(`average' , lwidth(`width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend') 
+	}
+	
+	return local added_line `added_line'
+
+end
+
+
+
+
+// if the user wants to use the old way of specifying the shaders
+capture prog drop get_old_way_xlines
+prog def get_old_way_xlines, rclass
+
+	syntax [ , shading_regions(string) x_count(string) user_width(string) ///
+		color(string asis) pattern(string) lsty(string) sty(string) ///
+		NOEXTend noxextend(string) xmin(string) xmax(string)]
+	
+	
+	// calculate lwidth here (rough approximation detailed below)
+	if "`user_width'" == "" {
+		local width = 470/`x_count'
+		local width "*`width'"
+		
+		
+		
+		//( NOXEXTEND ONLY BITES WHEN OLD WAY IS SPECIFIED )
+		
+		//////////////////////
+		// noxextend OPTION //
+		//////////////////////
+		/* 
+		 For noxextend, we divide the shading range [x-.5,x] (which is
+		 what each shaed area is by default) into 200 individula pieces.
+		 Then, we take the noxextend number as a % to throw out of the 
+		 top or bottom and make the range [x+%/200,x] for mins
+		 or [x,x+.5-%/200] for maxes where % is the number provided
+		 in the string or 25 if the user sets noxextend to on. We also divide
+		 the line width by 200 for these added lines so that they look right.
+		 We also do [x,x+.25] or [x-.25,x] with half of the normal line 
+		 width for the other half of the xline.
+		 
+		 There will be an error (only deals with min side) if it is the
+		 top and bottom, but maybe they shouldn't be calling this in that case...
+		*/
+		local extra_line_min
+		local extra_line_max
+		if "`noxextend'" != "" {
+			local edge_width = 470/(200*`x_count')+1 	// decide width
+			local increment = 1/200				// find increment
+			local half_width = 470/(2*`x_count') // find half of width
+			
+			// take out min if it's shaded
+			foreach s in `shading_regions' {
+				if `s' == `xmin' {
+					local shading_regions : list shading_regions - xmin 
+					local bottom = `xmin' - .5 + `noxextend'/200
+					local top = `xmin' + .25
+					numlist "`bottom'(`increment')`xmin'", sort
+					local mins `r(numlist)'
+					local extra_line_min xline(`mins' , lwidth(*`edge_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
+					local extra_line_max `extra_line_max' xline(`top', lwidth(*`half_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
+					continue
+				}
+				// take out max if it's shaded
+				if `s' == `xmax' {
+				di "max"
+					local shading_regions : list shading_regions - xmax 
+					local bottom = `xmax' - .25
+					local top = `xmax' + .5 - `noxextend'/200
+					numlist "`xmax'(`increment')`top'", sort
+					local maxes `r(numlist)'
+					di "`maxes'"
+					di"`bottom'"
+					local extra_line_max xline(`maxes' , lwidth(*`edge_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
+					local extra_line_max `extra_line_max' xline(`bottom', lwidth(*`half_width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend')
+					continue
+				}
+			}
+		}
+	}
+	else {
+		// allow user to specify all lwidth or individual shader lwidth
+		local wc: word count `lwidth'
+		if `wc' == `num_shaders' local width : word `ii' of `lwidth'
+		else local width `lwidth'
+	}
+
+	// if we use noextend and it takes out the only value in shading regions, then we have an error, so we make sure we don't here
+	local wc : word count `shading_regions'
+	if `wc' > 0 local added_line xline(`shading_regions' , lwidth(`width') lcolor(`color') lpattern(`pattern') lstyle(`lsty') style(`sty') `noextend') 
+
+	return local added_line `added_line' `extra_line_max' `extra_line_min'
+
+end
+
+
+
+
+// returns a numlist of the shader within the bounds of the xvar
 capture prog drop get_numlist
 prog def get_numlist, rclass
 	local shader `1'
@@ -312,7 +414,7 @@ prog def get_numlist, rclass
 		// no need to condition on `full_if' or `full_in' because we do that below
 		qui levelsof `xvar' if `shader'==1, c l(date_list)
 		
-		numlist "`date_list'"
+		numlist "`date_list'", sort
 		local shading_list `r(numlist)'
 	}
 	
@@ -335,7 +437,7 @@ prog def get_numlist, rclass
 		local daily_list `" "`dailies1'" "`dailies2'" "`dailies3'" "`dailies4'" "`dailies5'" "`dailies6'" "`dailies7'" "`dailies8'" "`dailies9'" "'
 		local shading_list
 		foreach daily in `daily_list' {	
-			numlist "`daily'"
+			numlist "`daily'", sort
 			local shading_list `shading_list' `r(numlist)'
 		}
 	}
@@ -350,7 +452,7 @@ prog def get_numlist, rclass
 			-334/-295 -122/-92 17/56 520/563 723/788 1044/1066 1122/1187 ///
 			1590/1620 2144/2175 2496/2569
 
-		numlist "`weeklies'"
+		numlist "`weeklies'", sort
 		local shading_list `r(numlist)'
 	}
 	
@@ -363,7 +465,7 @@ prog def get_numlist, rclass
 			-133/-123 -77/-68 -28/-21 4/13 120/130 167/182 241/246 259/274 ///
 			367/374 495/502 576/593
 
-		numlist "`monthlies'"
+		numlist "`monthlies'", sort
 		local shading_list `r(numlist)'	
 	}
 	
@@ -375,11 +477,14 @@ prog def get_numlist, rclass
 			-147/-143 -133/-130 -122/-108 -91/-87 -60/-58 -45/-42 -26/-24 ///
 			-10/-8 1/3 40/42 55/60 80/81 86/90 122/124 165/166 192/197
 
-		numlist "`quarterlies'"
+		numlist "`quarterlies'",sort
 		local shading_list `r(numlist)'
 	}
 	return local shading_list `shading_list'
 end
+
+
+
 
 
 /*
@@ -390,9 +495,10 @@ set obs 2000
 gen date = _n
 gen series = sqrt(_n)+runiform()
 
-bgshade date if inlist(date,1,200), shaders(month) ///
-	twoway(line series date if inlist(date,1,200), xlab(1(1)200)) ///
-								 sstyle(lwidth(*1.0))
+local n 200
+bgshade date if inlist(date,1,`n'), shaders(month) ///
+	twoway(line series date if inlist(date,1,`n'), xlab(1(1)`n')) ///
+								 sstyle(lwidth(*1.0)) old
 
 								 
 over and over changing the lwidth until it is just right 
