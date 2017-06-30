@@ -11,31 +11,28 @@ dummy variable(s) denoting shaded areas and/or precoded NBER recessions.
 
 {title:Syntax}
 	{p 8 4 2}
-    {bf:bgshade} {it:xvar} [{it:{help if}}] [{it:{help in}}] [, {it:options}]{p_end}
+    {bf:bgshade} {it:x/yvar} [{it:{help if}}] [{it:{help in}}] [, {it:options}]{p_end}
 	{p 4 4 2}
-	where {it:xvar} is the variable on the x axis. {it:if} and {it:in} statements
-	apply only to the shaders, not to the plotted variables.
+	where {it:x/yvar} is the variable on the x or y axis that the shaded regions
+	will be added to. {it:if} and {it:in} statements
+	apply only to the shaders, not to the plotted variables. x/yvar must be 
 
 	
     {it:options}{col 40}{...}
 description
     {hline}
+    {cmd:twoway(}{it:{help twoway}}{cmd:)}{col 40}{...}
+full twoway command minus shading goes in here*
     {cmd:shaders(}{it:varlist and/or NBER}{cmd:)}{col 40}{...}
 variable used for shading or {it:NBER option}
     {cmd:sstyle(}{it:{help added_line_options}}{cmd:)}{col 40}{...}
 include added line suboptions for shaders
     {cmd:{ul:leg}end}{col 40}{...}
 Include shaded regions in legend
-    {cmd:twoway(}{it:{help twoway}}{cmd:)}{col 40}{...}
-full twoway command minus shading goes in here
-    {cmd:old}{col 40}{...}
+    {cmd:{ul:old}shaders}{col 40}{...}
 Insert shaders using the "old" method
-
-    {it:twoway legend suboptions}{col 40}{...}
-description
-    {hline}
-    legend([{it:order()}][{help legend_options:{it:options}}]){col 40}{...}
-{it:order} can include the shaders and labels in the graph legend
+    {cmd:{ul:horiz}ontal}{col 40}{...}
+Insert shaders on the yaxis rather than the x axis
 
     {it:NBER options}{col 40}{...}
 description
@@ -49,8 +46,9 @@ weekly recessions (if first week of month is in recession month)
     {cmd:day}{col 40}{...}
 daily recessions (mapped to full month)
     {hline}
+    *twoway() is the only required argument
 
-
+	
 {title:Description}
 
 {p 4 4 2}
@@ -72,7 +70,7 @@ in which case no shaded areas are plotted.
 
 {p 4 8 2}
 {cmd:sstyle(}{it:{help added_line_options}}{cmd:)} sets any line style options for
-the shaded regions. Only some options will have any effect though, these include
+the shaded regions. Only some options will have any effect though, these include axis,
 style, lstyle, noextend, lpattern, lwidth, and lcolor. 
 
 {pmore}
@@ -81,6 +79,11 @@ difference that you specify however many options as you have shaders. If I have 
 shaders (var1 and var2) and I want var1 to be green and var2 to be red then I would specify
 {cmd:sstyle(lcolor(}green red{cmd:))}. The lwidth option can be specified either for all
 shaders or once and will, in the latter case, apply to all shaders.
+
+{pmore}
+Note: lwidth sets the {bf:unit width}. This means that if a shader is 3 units wide and lwidth is 2, the 
+actual width will be 3*2 = 6. lwidth should only be specified as a number or list of numbers unless
+the oldshader option is used, then either *# or # notation are available.
 
 {pmore}
 {it:Advanced options:} 
@@ -116,7 +119,7 @@ that the {it:{help bgshade##legend:legend}} suboption does have some
 extra frills explained below.
 
 {p 4 8 2}
-{cmd:old} generally only useful in two cases: First, if you get the {error:too many options}
+{cmd:oldshaders} generally only useful in two cases: First, if you get the {error:too many options}
 error, then specifying {cmd:old} will cut down on the total number of options used by 
 {cmd:bgshade} in the resulting {cmd:twoway} command. Second, if you want to use the 
 {it:noxextend} suboption of {cmd:sstyle()}, it is only supported with {cmd:old}.
@@ -135,6 +138,11 @@ have xline options as follows:
 {it:xline( 5.5 , lwidth(*40) lcolor(gs12) lpattern() lstyle() style())}
 {it:xline( 19 , lwidth(*30) lcolor(gs12) lpattern() lstyle() style())}
 
+{p 4 8 2}
+{cmd:horizontal} Specifying {cmd:horizontal} places the shaded areas on the y-axis.
+The {it:x/yvar} should be set to the y variable on which you want to place the 
+added lines. It is possible to specify {cmd:axis(}#{cmd:)} so that the ylines are
+placed onto an axis that is not the first.
 
 
 {title:Twoway legend suboption}
@@ -198,7 +206,7 @@ not extend to the end of the month.
 	{com}bgshade date, shaders(res1 res2 res3 res4) ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(-2(2)14) ///
 	{com}   title("All default shading colors and patterns"))       
-
+	{com}
 {col 5}{txt}*using extra options in twoway
 	{com}bgshade date, shaders(res1 res2 res3 res4) ///
 	{com}   twoway(line line1 date, lcolor(magenta) || (sc line2 date, msize(huge)), xlab(-2(2)14) ///
@@ -216,26 +224,20 @@ not extend to the end of the month.
 	{com}   twoway(line line1 date || sc line2 date, xlab(-2(2)14) ///
 	{com}   title("Using some sstyle options"))
 	{com}
-{col 5}{txt}*using lstyle and style suboptions
-	{com}bgshade date, shaders(res2 res3 res4) ///
-	{com}   sstyle(lstyle(foreground p2 refline) style(default unextended extended)) ///
-	{com}   twoway(line line1 date || sc line2 date, xlab(-2(2)14) ///
-	{com}   title("Using lstyle and style suboptions"))
-	{com}
 {col 5}{txt}*legend options
 	{com}lab var res1 "Shader 1"
 	{com}lab var res2 "Shader 2"
 	{com}bgshade date, shaders(res1 res2 res3 res4) legend ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(-2(2)14) ///
 	{com}   title("Add shaders to the legend")) 
-   
+	{com}   
 {col 5}{txt}*mix it up with the legend
 	{com}bgshade date, shaders(res1 res2 res3 res4) legend ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(-2(2)14) ///
 	{com}   title("Using order legend suboption") ///    
 	{com}   legend(order(5 "Square Root of N" 6 "N Squared over 20" 2 "Res2" 4 "Res4") cols(2)))    
-
-{col 5}{txt}*more than 4 shaders example
+	{com}
+	{com}*more than 4 shaders example
 	{com}drop res*
 	{com}forvalues ii = 1/8 {
 	{com}   gen res`ii' = _n == `ii'+2
@@ -245,31 +247,37 @@ not extend to the end of the month.
 	{com}   sstyle(lpattern( l _ l _ l _ l _) lcolor(green blue red magenta orange navy "255 0 0" eltgreen)) ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(0(1)12) ///
 	{com}   title("More than 4 shaders"))
-
-{col 5}{txt}*playing with the shader width since it's not perfect above
+	{com}
+{col 5}{txt}*playing with the shader WIDTH since it's not perfect above
 	{com}bgshade date, shaders(res1 res2 res3 res4 res5 res6 res7 res8) ///
-	{com}   sstyle(lwidth(*30) ///
+	{com}   sstyle(lwidth(10) ///
 	{com}   lpattern( l _ l _ l _ l _) lcolor(green blue red magenta orange navy "255 0 0" eltgreen)) ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(0(1)12) ///
 	{com}   title("Changing all widths"))
 	{com}   
 {col 5}{txt}*alternative setting each individual shader's width
 	{com}bgshade date, shaders(res1 res2 res3 res4 res5 res6 res7 res8) ///
-	{com}   sstyle(lwidth(*30 *40 *10 *50 *10 *30 *40 *70) ///
+	{com}   sstyle(lwidth(1 4 10 25 1 3 14 7) ///
 	{com}   lpattern( l _ l _ l _ l _) lcolor(green blue red magenta orange navy "255 0 0" eltgreen)) ///
 	{com}   twoway(line line1 date || sc line2 date, xlab(0(1)12) ///
 	{com}   title("Changing individual widths"))
 	{com}
-{col 5}{txt}*noxextend example
+{col 5}{txt}*noxextend example (oldshaders too)
 	{com}gen res = _n < 3 | _n > 10
 	{com}
 	{com}bgshade date, shaders(res) sstyle(noxextend(100)) ///
-	{com}	twoway(line line1 date, title("Too hot"))
+	{com}	twoway(line line1 date, title("Too hot")) oldshaders
 	{com}bgshade date, shaders(res) sstyle(noxextend(-100)) ///
-	{com}	twoway(line line1 date, title("Too cold"))
+	{com}	twoway(line line1 date, title("Too cold")) oldshaders
 	{com}bgshade date, shaders(res) sstyle(noxextend(60)) ///
-	{com}	twoway(line line1 date, title("Just right"))	
-	
+	{com}	twoway(line line1 date, title("Just right")) oldshaders
+	{com}
+{col 5}{txt}*horizontal example
+	{com}gen yvar = _n
+	{com}replace res = yvar > 3 & yvar < 5
+	{com}replace res2 = yvar > 5 & yvar < 7
+	{com}bgshade yvar, shaders(res res2) ///
+	{com}	twoway(line yvar date) horiz
 	
 {title:Future plans}
 {txt}
@@ -290,8 +298,7 @@ Kit Baum has a great program {cmd:nbercycles} available from SSC which
 tackles the same problem as here, but by adding area graphs to your line plot
 rather than adding lines and resizing them.
 				
+				
 
-
-
-
-
+				
+				
