@@ -1,3 +1,5 @@
+*! version 1.0 Eric Haavind-Berman 12July2017
+
 // Eric Haavind-Berman and Aaron Markiewitz
 
 // bgshade, which makes a twoway plot and adds shading with added lines while
