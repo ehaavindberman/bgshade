@@ -54,11 +54,11 @@ daily recessions (mapped to full month)
 {title:Description}
 
 {p 4 4 2}
-{cmd:bgshade} plots {it:varlist} as a {help twoway} plot which includes 
-either NBER recession shading whose dates come from 
-{browse "https://fred.stlouisfed.org/series/USREC"} and/or the dummy variable(s)
-specified in {cmd:shaders()} as added lines. Returns the full twoway command, 
-the list of x/ylines by shader, and the unit lwidth for the added lines.
+{cmd:bgshade} is a wrapper for Stata's {help twoway} command and includes either
+NBER recession shading whose dates come from {browse "https://fred.stlouisfed.org/series/USREC"}
+and/or the dummy variable(s) specified in the {cmd:shaders()} option as added lines.
+{cmd:bgshade} returns the full twoway command, the list of added x/ylines by shader,
+and the unit lwidth for the added lines.
 
 
 {title:Options}
