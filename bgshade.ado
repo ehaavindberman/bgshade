@@ -34,7 +34,7 @@ prog def bgshade, rclass
 		local def_color sienna orange sand eltgreen
 	}
 	
-	if c(version) >= 15 | "`oldshaders'" != "" {
+	if c(version) >= 15 & "`oldshaders'" == "" {
 		local intensity_shifter %50
 		local def_pattern
 	}
