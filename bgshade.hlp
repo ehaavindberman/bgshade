@@ -3,6 +3,7 @@
 {* version 8}
 {viewerjumpto "Legend" "bgshade##legend"}{...}
 {viewerjumpto "Legend Example" "bgshade##legend_ex"}{...}
+{viewerjumpto "Noxextend" "bgshade##noxextend_ex"}{...}
 {title:Title}
 
 {p 4 4 2}{hi: bgshade} {hline 2} Add background shading to twoway plots using either
@@ -15,7 +16,8 @@ dummy variable(s) denoting shaded areas and/or precoded NBER recessions.
 	{p 4 4 2}
 	where {it:x/yvar} is the variable on the x or y axis that the shaded regions
 	will be added to. {it:if} and {it:in} statements
-	apply only to the shaders, not to the plotted variables. x/yvar must be 
+	apply only to the shaders, not to the plotted variables. x/yvar should be integers
+	for custom shaders to work well.
 
 	
     {it:options}{col 40}{...}
@@ -56,7 +58,7 @@ daily recessions (mapped to full month)
 either NBER recession shading whose dates come from 
 {browse "https://fred.stlouisfed.org/series/USREC"} and/or the dummy variable(s)
 specified in {cmd:shaders()} as added lines. Returns the full twoway command, 
-the list of xlines by shader, and the lwidth for the added lines.
+the list of x/ylines by shader, and the unit lwidth for the added lines.
 
 
 {title:Options}
@@ -74,7 +76,7 @@ the shaded regions. Only some options will have any effect though, these include
 style, lstyle, noextend, lpattern, lwidth, and lcolor. 
 
 {pmore}
-These options do exactly what they say they do in {it:{help added_line_options}}, with the
+These options are outlined in {it:{help added_line_options}}, with the
 difference that you specify however many options as you have shaders. If I have two
 shaders (var1 and var2) and I want var1 to be green and var2 to be red then I would specify
 {cmd:sstyle(lcolor(}green red{cmd:))}. The lwidth option can be specified either for all
@@ -89,7 +91,7 @@ the oldshader option is used, then either *# or # notation are available.
 {it:Advanced options:} 
 
 {pmore}
-{it:noxextend()} (only for use with {cmd:old} option) takes a number input or "on" for default
+{it:noxextend()} (only for use with {cmd:oldshaders} option) takes a number input or "on" for default
 settings. {it:noxextend(on)} tells {cmd:bgshade} that the shaded regions
 extend off the edge of the plot area to the right or left. {cmd:bgshade} will then 
 figure out which side is the issue (or both) and take off 25% of the left- or 
@@ -97,14 +99,14 @@ right-most added line. Setting a number tells {cmd:bgshade} to take off that % o
 the added line that is going off the chart.
 It is possible to specify any number, but > 100 has the same
 functionality as 100 and negative numbers extend, rather than retract the shading.
-See the example below and play around with it yourself if you're curious.
+See the {it:{help bgshade##noxextend_ex:example}} below and play around with it yourself if you're curious.
 
 {pmore}
 {it:intensity()} takes a number input that adjusts the intensity of the shaded 
 region colors. In Stata 15 the default is %50, in earlier versions the default 
 is *.4. To shut off intensity shifting, use intensity(*1). For further elaboration, 
 see the Adjust intensity and Adjust opacity sections in {it:{help colorstyle}}. 
-If you specify the {cmd:old} option, then the defaults will be the same as 
+If you specify the {cmd:oldshaders} option, then the defaults will be the same as 
 pre-Stata 15 defaults.
 
 {p 4 8 2}
@@ -119,10 +121,10 @@ that the {it:{help bgshade##legend:legend}} suboption does have some
 extra frills explained below.
 
 {p 4 8 2}
-{cmd:oldshaders} generally only useful in two cases: First, if you get the {error:too many options}
-error, then specifying {cmd:old} will cut down on the total number of options used by 
+{cmd:{ul:old}shaders} generally only useful in two cases: First, if you get the {error:too many options}
+error, then specifying {cmd:oldshaders} will cut down on the total number of options used by 
 {cmd:bgshade} in the resulting {cmd:twoway} command. Second, if you want to use the 
-{it:noxextend} suboption of {cmd:sstyle()}, it is only supported with {cmd:old}.
+{it:noxextend} suboption of {cmd:sstyle()}, it is only supported with {cmd:oldshaders}.
 
 {pmore} 
 For an explanation of the difference - when using {cmd:old}, {cmd:bgshade} creates 
@@ -141,8 +143,8 @@ have xline options as follows:
 {p 4 8 2}
 {cmd:horizontal} Specifying {cmd:horizontal} places the shaded areas on the y-axis.
 The {it:x/yvar} should be set to the y variable on which you want to place the 
-added lines. It is possible to specify {cmd:axis(}#{cmd:)} so that the ylines are
-placed onto an axis that is not the first.
+added lines. Note: you can specify {cmd:axis(}#{cmd:)} within {cmd:sstyle()}
+so that the ylines are placed onto an axis that is not the first.
 
 
 {title:Twoway legend suboption}
@@ -151,7 +153,7 @@ placed onto an axis that is not the first.
 {p 4 8 2}
 {it:{help legend_options}} are all included, but we have added
 functionality to include shaded regions in the legend by adding to the {cmd:order()}
-subsuboption {help bgshade##legend_ex:Example} included below.
+option. {help bgshade##legend_ex:Example} included below.
 
 {pmore}
 If you would rather a wordy explanation: the shaders are added to the legend 
@@ -262,6 +264,7 @@ not extend to the end of the month.
 	{com}   twoway(line line1 date || sc line2 date, xlab(0(1)12) ///
 	{com}   title("Changing individual widths"))
 	{com}
+{marker noxextend_ex}{...}
 {col 5}{txt}*noxextend example (oldshaders too)
 	{com}gen res = _n < 3 | _n > 10
 	{com}
