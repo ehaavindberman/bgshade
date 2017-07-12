@@ -19,6 +19,8 @@ prog def bgshade, rclass
 	// set default values //
 	////////////////////////
 	
+	if c(version) >= 15 version 15
+	else version 8
 	
 	local intensity_shifter *.4
 	local noxextend_val 25
