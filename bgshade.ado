@@ -5,8 +5,7 @@
 // also, it has hard-coded nber recessions which is nice.
 
 /*
-TODO: make weekly and daily data extend to the end of each month (is this positive/necessary?)
-TODO: add some other aggregation method for quarterly (is this positive/necessary?)
+TODO: have someone else check the daily, weekly, and quarterly recession numbers
 */
 
 capture program drop bgshade
