@@ -222,7 +222,7 @@ prog def bgshade, rclass
 			if "`legend'" != "" {
 				// find the middle of the graph so we can place a function there and
 				// recast as an invisible area plot
-				qui su `yvar'
+				qui su `yvar' `shade_if' `shade_in' 
 				local ymiddle = (`r(min)' +`r(max)') / 2
 				local xmiddle = (`xmin' + `xmax') / 2
 				// use the same x and y format as the xvar and yvar
