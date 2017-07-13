@@ -102,9 +102,9 @@ functionality as 100 and negative numbers extend, rather than retract the shadin
 See the {it:{help bgshade##noxextend_ex:example}} below and play around with it yourself if you're curious.
 
 {pmore}
-{it:intensity()} takes a number input that adjusts the intensity of the shaded 
+{it:intensity()} takes a %# or *# input that adjusts the intensity of the shaded 
 region colors. In Stata 15 the default is %50, in earlier versions the default 
-is *.4. To shut off intensity shifting, use intensity(*1). For further elaboration, 
+is *.4. To shut off intensity shifting, use intensity(*1) or intensity(%100). For further elaboration, 
 see the Adjust intensity and Adjust opacity sections in {it:{help colorstyle}}. 
 If you specify the {cmd:oldshaders} option, then the defaults will be the same as 
 pre-Stata 15 defaults.
