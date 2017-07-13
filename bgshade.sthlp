@@ -1,6 +1,6 @@
 {smcl}
 {* 4may2017}{...}
-{* version 8}
+{* version 1.0}
 {viewerjumpto "Legend" "bgshade##legend"}{...}
 {viewerjumpto "Legend Example" "bgshade##legend_ex"}{...}
 {viewerjumpto "Noxextend" "bgshade##noxextend_ex"}{...}
