@@ -5,7 +5,7 @@ To download the code, you can run `ssc install bgshade` in your Stata window.
 
 To access the detailed help files you can run `help bgshade` in your Stata window.
 
-For those who don't know, Stata is a statistical programming language used widely by Economists and something I have become pretty good at. However, Stata is not the most flexible tool for graphics. Specifically, there are not options to shade regions of a graph effectively, so I took on the challenge along with a friend of mine to work around this.
+For those who don't know, Stata is a statistical programming language used widely by Economists. In Stata there are not options to shade regions of a graph effectively. Bgshade fixes this issue.
 
 On its surface, bgshade is a command that takes a dummy variable in a Stata dataset and adds shading to the areas where that dummy variable = 1. We extended this to include the following features: pre-coded NBER recession shading; horizontal or vertical shaded regions; separate styling for more than one shaded region; and adding shaded regions and their labels to the legend if asked.
 
