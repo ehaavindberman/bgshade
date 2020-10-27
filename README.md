@@ -1,6 +1,8 @@
 # bgshade
 Stata function to add shading to twoway plots with NBER recessions hard coded.
+
 To download the code, you can run `ssc install bgshade` in your Stata window.
+
 To access the detailed help files you can run `help bgshade` in your Stata window.
 
 For those who don't know, Stata is a statistical programming language used widely by Economists and something I have become pretty good at. However, Stata is not the most flexible tool for graphics. Specifically, there are not options to shade regions of a graph effectively, so I took on the challenge along with a friend of mine to work around this.
